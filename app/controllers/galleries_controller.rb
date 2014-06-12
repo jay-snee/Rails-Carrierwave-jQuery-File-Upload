@@ -15,7 +15,7 @@ class GalleriesController < ApplicationController
   def show
     @gallery = Gallery.find(params[:id])
     @picture = @gallery.pictures.build
-    @pictures = Picture.find(:all, :conditions  => [ 'gallery_id = ?', @gallery.id ])
+    @pictures = Picture.where(gallery_id: @gallery.id)
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @gallery }
@@ -46,7 +46,7 @@ class GalleriesController < ApplicationController
   # POST /galleries
   # POST /galleries.json
   def create
-    @gallery = Gallery.new(params[:gallery])
+    @gallery = Gallery.new(gallery_params)
     @pictures = Picture.where(:gallery_token => @gallery.token)
     @gallery.pictures << @pictures
 
@@ -67,7 +67,7 @@ class GalleriesController < ApplicationController
     @gallery = Gallery.find(params[:id])
 
     respond_to do |format|
-      if @gallery.update_attributes(params[:gallery])
+      if @gallery.update_attributes(gallery_params)
         format.html { redirect_to @gallery, notice: 'Gallery was successfully updated.' }
         format.json { head :no_content }
       else
@@ -88,4 +88,11 @@ class GalleriesController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  private
+
+    def gallery_params
+      params.require(:gallery).permit(:cover, :description, :name, :token)
+    end
+
 end
